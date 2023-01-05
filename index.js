@@ -1,7 +1,7 @@
 import { Server } from "hapi";
 import { scanMethods } from "./methods.js";
 import { scanRoutes } from "./routes.js";
-import { join, dirname } from "path";
+import { join, dirname, normalize } from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
@@ -16,9 +16,9 @@ const server = new Server({
         },
     },
 });
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = new URL(join("file:///", dirname(fileURLToPath(import.meta.url))));
 
-server.method(await scanMethods(join(__dirname, "methods")));
-server.route(await scanRoutes(join(__dirname, "routes")));
+server.method(await scanMethods(new URL(join(__dirname.href, "methods"))));
+server.route(await scanRoutes(new URL(join(__dirname.href, "routes"))));
 await server.start();
 console.log(`Listening to:`, server.info.uri)
